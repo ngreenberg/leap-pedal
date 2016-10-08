@@ -45,18 +45,18 @@ class SampleListener(Leap.Listener):
                 if len(hand.fingers.extended()) == 0 and self.start_time is not None:
                     length = frame.timestamp - self.start_time
                     length /= 1000000.
-                    # print length
+                    print "gap:", length
                     self.start_time = None
 
                 if hand.grab_strength == 1 and len(hand.fingers.extended()) == 0:
                     return
 
                 if len(hand.fingers.extended()) == 5 and len(prev_hand.fingers.extended()) == 5:
-                    if roll < 40 and roll > -40:
+                    if roll < 25 and roll > -25:
                         self.volume += (hand.palm_position[1] - prev_hand.palm_position[1]) * 1
                         self.volume = max(0, self.volume)
                         self.volume = min(100, self.volume)
-                        # print self.volume
+                        print "volume:", self.volume
                         volume_string = str(self.volume) + "%"
 
                         FNULL = open(os.devnull, 'w')
@@ -67,14 +67,13 @@ class SampleListener(Leap.Listener):
                                 self.is_swiping = False
                         else:
                             if not self.is_swiping:
-                                if frame.timestamp - self.last_swipe_time > 1000000:
+                                if frame.timestamp - self.last_swipe_time > 750000:
                                     self.is_swiping = True
                                     self.last_swipe_time = frame.timestamp
-                                    print hand.palm_velocity[0]
                                     if hand.palm_velocity[0] > 0:
-                                        print "+1"
+                                        print "pitch: +1"
                                     else:
-                                        print "-1"
+                                        print "pitch: -1"
 
 def main():
     # Create a sample listener and controller
