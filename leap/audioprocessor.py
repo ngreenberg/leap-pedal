@@ -16,6 +16,7 @@ class audioProcessor:
         self.recording = False
         self.playingBack = False
         self.loop = []
+        self.recordingLoop = []
         self.loopIndex = 0
 
     def processSound(self, in_data):
@@ -23,7 +24,7 @@ class audioProcessor:
         # if reversing:
         #     decoded = ap.reverse(decoded, 4)
         if self.recording:
-            self.loop.append(decoded)
+            self.recording.append(decoded)
         return decoded
 
     def callback(self, in_data, frame_count, time_info, status):
@@ -36,6 +37,8 @@ class audioProcessor:
             decoded = self.processSound(in_data)
             result_waiting = True
         elif self.playingBack:
+            if self.recording:
+                self.loop.append(decoded)
             if self.loop:
                 if self.loopIndex > len(self.loop) - 1:
                     self.loopIndex = 0
