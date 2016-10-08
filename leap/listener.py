@@ -64,19 +64,23 @@ class SampleListener(Leap.Listener):
                         self.start_time = frame.timestamp
                         self.ap.recordingLoop = []
                         self.ap.recording = True
+                        print 'Recording Begun'
 
                 if len(extended_fingers) > 1 and self.start_time is not None:
                     self.start_time = None
                     self.ap.recordingLoop = []
+                    print 'Erased recording loop'
 
                 if len(extended_fingers) == 0 and self.start_time is not None:
                     length = frame.timestamp - self.start_time
                     length /= 1000000.
                     print "gap:", length
-                    self.ap.loop = self.ap.recordingLoop
+                    self.ap.loop = list(self.ap.recordingLoop)
+                    self.ap.recordingLoop = []
                     self.start_time = None
                     self.ap.recording = False
                     self.ap.playingBack = True
+                    print 'Recording stopped. Playing Back loop of length ', len(self.ap.loop)
 
                 if hand.grab_strength == 1 and len(hand.fingers.extended()) == 0:
                     return
@@ -88,7 +92,6 @@ class SampleListener(Leap.Listener):
                         self.volume = min(100, self.volume)
                         print "volume:", self.volume
                         volume_string = str(self.volume) + "%"
-
                         FNULL = open(os.devnull, 'w')
                         subprocess.call(["amixer", "-D", "pulse", "sset", "Master", volume_string], stdout=FNULL, stderr=subprocess.STDOUT)
                     else:
