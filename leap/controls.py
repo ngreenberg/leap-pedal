@@ -8,26 +8,23 @@ import Leap
 import subprocess
 
 class SampleListener(Leap.Listener):
+    volume = 0
 
     def on_connect(self, controller):
         print "Connected"
 
     def on_frame(self, controller):
         frame = controller.frame()
+        prev_frame = controller.frame(1)
 
-        # Get hands
-        for hand in frame.hands:
-
-            handType = "Left hand" if hand.is_left else "Right hand"
-
-            print "  %s, id %d, position: %s" % (
-                handType, hand.id, hand.palm_position)
-
-            volume = (hand.palm_position[1] - 50) / 4
-            volume = max(0, volume)
-            volume = min(100, volume)
-            print volume
-            volume_string = str(volume) + "%"
+        if len(frame.hands) > 0 and len(prev_frame.hands) != 0:
+            hand = frame.hands[0]
+            prev_hand = prev_frame.hands[0]
+            self.volume += (hand.palm_position[1] - prev_hand.palm_position[1]) * 1
+            self.volume = max(0, self.volume)
+            self.volume = min(100, self.volume)
+            print self.volume
+            volume_string = str(self.volume) + "%"
 
             FNULL = open(os.devnull, 'w')
             subprocess.call(["amixer", "-D", "pulse", "sset", "Master", volume_string], stdout=FNULL, stderr=subprocess.STDOUT)
