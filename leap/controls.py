@@ -10,6 +10,7 @@ import subprocess
 class SampleListener(Leap.Listener):
     volume = 0
 
+    gesture = None
     start_time = None
 
     is_swiping = False
@@ -29,7 +30,6 @@ class SampleListener(Leap.Listener):
             # FNULL = open(os.devnull, 'w')
             # subprocess.call(["amixer", "-D", "pulse", "sset", "Master", volume_string], stdout=FNULL, stderr=subprocess.STDOUT)
 
-
             normal = hand.palm_normal
             direction = hand.direction
 
@@ -37,17 +37,29 @@ class SampleListener(Leap.Listener):
             roll = normal.roll * Leap.RAD_TO_DEG
             yaw = direction.yaw * Leap.RAD_TO_DEG
 
+            # for finger in hand.fingers.extended():
+            #     print finger.type,
+            # print ""
+
             if len(prev_frame.hands) != 0:
                 prev_hand = prev_frame.hands[0]
 
-                if len(hand.fingers.extended()) == 1:
+                extended_fingers = hand.fingers.extended()
+
+                # if len(prev_hand.fingers.extended()) == 0:
+                #     self.start_time = frame.timestamp
+
+                #     if len(extended_fingers) == 1:
+                #         if extended_fingers[0].type == 0:
+                
+                if len(extended_fingers) == 1 and extended_fingers[0].type == 0:
                     if len(prev_hand.fingers.extended()) == 0:
                         self.start_time = frame.timestamp
 
-                if len(hand.fingers.extended()) > 1 and self.start_time is not None:
+                if len(extended_fingers) > 1 and self.start_time is not None:
                     self.start_time = None
 
-                if len(hand.fingers.extended()) == 0 and self.start_time is not None:
+                if len(extended_fingers) == 0 and self.start_time is not None:
                     length = frame.timestamp - self.start_time
                     length /= 1000000.
                     print "gap:", length
@@ -56,7 +68,7 @@ class SampleListener(Leap.Listener):
                 if hand.grab_strength == 1 and len(hand.fingers.extended()) == 0:
                     return
 
-                if len(hand.fingers.extended()) == 5 and len(prev_hand.fingers.extended()) == 5:
+                if len(extended_fingers) == 5 and len(prev_hand.fingers.extended()) == 5:
                     if roll < 25 and roll > -25:
                         self.volume += (hand.palm_position[1] - prev_hand.palm_position[1]) * 1
                         self.volume = max(0, self.volume)
