@@ -4,6 +4,7 @@ import time
 import numpy as np
 import scipy.signal as signal
 import audioop as ap
+import curses
 from matplotlib import pyplot as plt
 
 WIDTH = 2
@@ -13,10 +14,10 @@ p = pyaudio.PyAudio()
 
 class audioProcessor:
     def __init__(self):
-        self.recording = True
+        self.recording = False
         self.playingBack = False
         self.loop = []
-        self.repeatingLoop = []
+        self.loopIndex = 0
 
     def processSound(self, in_data):
         decoded = np.fromstring(in_data, dtype=np.float32)
@@ -29,19 +30,15 @@ class audioProcessor:
     def callback(self, in_data, frame_count, time_info, status):
         global decoded
         global result_waiting
-        if(len(self.loop) > 75):
-            self.recording = False
-            self.playingBack = True
         if in_data and not self.playingBack:
             decoded = self.processSound(in_data)
             result_waiting = True
         elif self.playingBack:
-            if self.repeatingLoop:
-                decoded = self.repeatingLoop.pop(0)
-                self.loop.append(decoded)
-            elif self.loop:
-                decoded = self.loop.pop(0)
-                self.repeatingLoop.append(decoded)
+            if self.loop:
+                if self.loopIndex > len(self.loop) - 1:
+                    self.loopIndex = 0
+                decoded = self.loop[self.loopIndex]
+                self.loopIndex += 1
             else:
                 self.playingBack = False
         else:
@@ -57,9 +54,18 @@ stream = p.open(format=p.get_format_from_width(WIDTH),
                 stream_callback=ap.callback)
 
 stream.start_stream()
-
+window = curses.initscr()
+# window.nodelay(1)
 while stream.is_active():
-    time.sleep(0.1)
+    ch = window.getch()
+    if ch == 10:
+        ap.recording = not ap.recording
+        if ap.recording:
+            'Recording'
+            ap.playingBack = False
+        elif ap.loop:
+            ap.playingBack = True
+    # time.sleep(0.1)
 
 
 stream.stop_stream()
