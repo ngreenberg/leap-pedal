@@ -21,18 +21,18 @@ def processSound(in_data):
         decoded = ap.reverse(decoded, 4)
     if recording:
         loop.append(decoded)
+    return decoded
 
 def callback(in_data, frame_count, time_info, status):
     global decoded
     global result_waiting
     if in_data and not playingBack:
-        processSound(in_data)
+        decoded = processSound(in_data)
         result_waiting = True
     else if playingBack:
-        ## ???
+        decoded = loop.readframes(frame_count)
     else:
         print('no input')
-
     return (decoded, pyaudio.paContinue)
 
 stream = p.open(format=p.get_format_from_width(WIDTH),
