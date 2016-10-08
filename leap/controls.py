@@ -25,6 +25,11 @@ class SampleListener(Leap.Listener):
         if len(frame.hands) > 0:
             hand = frame.hands[0]
 
+            # volume_string = str((1-hand.pinch_strength)*100) + "%"
+            # FNULL = open(os.devnull, 'w')
+            # subprocess.call(["amixer", "-D", "pulse", "sset", "Master", volume_string], stdout=FNULL, stderr=subprocess.STDOUT)
+
+
             normal = hand.palm_normal
             direction = hand.direction
 
