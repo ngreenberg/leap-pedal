@@ -29,6 +29,9 @@ class audioProcessor:
     def callback(self, in_data, frame_count, time_info, status):
         global decoded
         global result_waiting
+        # print 'Recording ', self.recording
+        print len(self.loop)
+        print 'Playback ', self.playingBack
         if in_data and not self.playingBack:
             decoded = self.processSound(in_data)
             result_waiting = True

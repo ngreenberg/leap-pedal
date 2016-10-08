@@ -25,6 +25,8 @@ class SampleListener(Leap.Listener):
         print "Connected"
 
     def on_frame(self, controller):
+        # print 'Recording ', self.ap.recording
+        # self.ap.recording = True
         frame = controller.frame()
         prev_frame = controller.frame(1)
 
@@ -56,19 +58,24 @@ class SampleListener(Leap.Listener):
 
                 #     if len(extended_fingers) == 1:
                 #         if extended_fingers[0].type == 0:
-                
+
                 if len(extended_fingers) == 1 and extended_fingers[0].type == 0:
                     if len(prev_hand.fingers.extended()) == 0:
                         self.start_time = frame.timestamp
+                        self.ap.loop = []
+                        self.ap.recording = True
 
                 if len(extended_fingers) > 1 and self.start_time is not None:
                     self.start_time = None
+                    self.ap.loop = []
 
                 if len(extended_fingers) == 0 and self.start_time is not None:
                     length = frame.timestamp - self.start_time
                     length /= 1000000.
                     print "gap:", length
                     self.start_time = None
+                    self.ap.recording = False
+                    self.ap.playingBack = True
 
                 if hand.grab_strength == 1 and len(hand.fingers.extended()) == 0:
                     return

@@ -23,12 +23,15 @@ def main():
     p = pyaudio.PyAudio()
 
     ap = audioProcessor()
+
     stream = p.open(format=p.get_format_from_width(WIDTH),
                     channels=CHANNELS,
                     rate=RATE,
                     input=True,
                     output=True,
                     stream_callback=ap.callback)
+    listener.connect_ap(ap)
+
 
     stream.start_stream()
 
