@@ -10,6 +10,11 @@ import subprocess
 class SampleListener(Leap.Listener):
     volume = 0
 
+    start_time = None
+
+    is_swiping = False
+    last_swipe_time = 0
+
     def on_connect(self, controller):
         print "Connected"
 
@@ -17,23 +22,59 @@ class SampleListener(Leap.Listener):
         frame = controller.frame()
         prev_frame = controller.frame(1)
 
-
-        if len(frame.hands) > 0 and len(prev_frame.hands) != 0:
+        if len(frame.hands) > 0:
             hand = frame.hands[0]
 
-            if hand.grab_strength >= 1:
-                return
-            
-            prev_hand = prev_frame.hands[0]
-            
-            self.volume += (hand.palm_position[1] - prev_hand.palm_position[1]) * 1
-            self.volume = max(0, self.volume)
-            self.volume = min(100, self.volume)
-            print self.volume
-            volume_string = str(self.volume) + "%"
+            normal = hand.palm_normal
+            direction = hand.direction
 
-            FNULL = open(os.devnull, 'w')
-            subprocess.call(["amixer", "-D", "pulse", "sset", "Master", volume_string], stdout=FNULL, stderr=subprocess.STDOUT)
+            pitch = direction.pitch * Leap.RAD_TO_DEG
+            roll = normal.roll * Leap.RAD_TO_DEG
+            yaw = direction.yaw * Leap.RAD_TO_DEG
+
+            if len(prev_frame.hands) != 0:
+                prev_hand = prev_frame.hands[0]
+
+                if len(hand.fingers.extended()) == 1:
+                    if len(prev_hand.fingers.extended()) == 0:
+                        self.start_time = frame.timestamp
+
+                if len(hand.fingers.extended()) > 1 and self.start_time is not None:
+                    self.start_time = None
+
+                if len(hand.fingers.extended()) == 0 and self.start_time is not None:
+                    length = frame.timestamp - self.start_time
+                    length /= 1000000.
+                    # print length
+                    self.start_time = None
+
+                if hand.grab_strength == 1 and len(hand.fingers.extended()) == 0:
+                    return
+
+                if len(hand.fingers.extended()) == 5 and len(prev_hand.fingers.extended()) == 5:
+                    if roll < 40 and roll > -40:
+                        self.volume += (hand.palm_position[1] - prev_hand.palm_position[1]) * 1
+                        self.volume = max(0, self.volume)
+                        self.volume = min(100, self.volume)
+                        # print self.volume
+                        volume_string = str(self.volume) + "%"
+
+                        FNULL = open(os.devnull, 'w')
+                        subprocess.call(["amixer", "-D", "pulse", "sset", "Master", volume_string], stdout=FNULL, stderr=subprocess.STDOUT)
+                    else:
+                        if hand.palm_velocity[0] < 150 and hand.palm_velocity[0] > -150:
+                            if self.is_swiping:
+                                self.is_swiping = False
+                        else:
+                            if not self.is_swiping:
+                                if frame.timestamp - self.last_swipe_time > 1000000:
+                                    self.is_swiping = True
+                                    self.last_swipe_time = frame.timestamp
+                                    print hand.palm_velocity[0]
+                                    if hand.palm_velocity[0] > 0:
+                                        print "+1"
+                                    else:
+                                        print "-1"
 
 def main():
     # Create a sample listener and controller
