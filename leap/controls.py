@@ -17,9 +17,15 @@ class SampleListener(Leap.Listener):
         frame = controller.frame()
         prev_frame = controller.frame(1)
 
+
         if len(frame.hands) > 0 and len(prev_frame.hands) != 0:
             hand = frame.hands[0]
+
+            if hand.grab_strength >= 1:
+                return
+            
             prev_hand = prev_frame.hands[0]
+            
             self.volume += (hand.palm_position[1] - prev_hand.palm_position[1]) * 1
             self.volume = max(0, self.volume)
             self.volume = min(100, self.volume)
