@@ -35,7 +35,7 @@ class SampleListener(Leap.Listener):
             volume_string = str((hand.pinch_strength)*100) + "%"
             FNULL = open(os.devnull, 'w')
             subprocess.call(["amixer", "-D", "pulse", "sset", "Master", volume_string], stdout=FNULL, stderr=subprocess.STDOUT)
-
+            print volume_string
             normal = hand.palm_normal
             direction = hand.direction
 
@@ -86,12 +86,7 @@ class SampleListener(Leap.Listener):
 
                 if len(extended_fingers) == 5 and len(prev_hand.fingers.extended()) == 5:
                     if roll < 25 and roll > -25:
-                        # audio_segment = pydub.AudioSegment(
-                        #     self.ap.loop,
-                        #     frame_rate = 44100,
-                        #     sample_width = 2,
-                        #     channels = 2
-                        # )
+                        pass
                     else:
                         if hand.palm_velocity[0] < 150 and hand.palm_velocity[0] > -150:
                             if self.is_swiping:
