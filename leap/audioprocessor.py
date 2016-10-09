@@ -20,8 +20,8 @@ class audioProcessor:
         self.recordingLoop = []
         self.loopIndex = 0
 
-    # def pitchShift(self, sample):
-
+    def pitchShift(self, sample):
+        resample(snd_array, 1.5, "sinc_fastest")
 
     def processSound(self, in_data):
         decoded = np.fromstring(in_data, dtype=np.float32)

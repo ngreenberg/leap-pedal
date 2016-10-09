@@ -86,12 +86,12 @@ class SampleListener(Leap.Listener):
 
                 if len(extended_fingers) == 5 and len(prev_hand.fingers.extended()) == 5:
                     if roll < 25 and roll > -25:
-                        audio_segment = pydub.AudioSegment(
-                            self.ap.loop,
-                            frame_rate = 44100,
-                            sample_width = 2,
-                            channels = 2
-                        )
+                        # audio_segment = pydub.AudioSegment(
+                        #     self.ap.loop,
+                        #     frame_rate = 44100,
+                        #     sample_width = 2,
+                        #     channels = 2
+                        # )
                     else:
                         if hand.palm_velocity[0] < 150 and hand.palm_velocity[0] > -150:
                             if self.is_swiping:
