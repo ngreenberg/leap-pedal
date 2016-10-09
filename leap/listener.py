@@ -92,10 +92,6 @@ class SampleListener(Leap.Listener):
                             sample_width = 2,
                             channels = 2
                         )
-                        something = audio_segment + 1
-                        # audio_segment += (hand.palm_position[1] - prev_hand.palm_position[1]) * 1
-                        something_two = something.get_array_of_samples()
-                        self.ap.loop = np.array(something_two)
                     else:
                         if hand.palm_velocity[0] < 150 and hand.palm_velocity[0] > -150:
                             if self.is_swiping:
