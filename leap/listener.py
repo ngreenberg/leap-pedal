@@ -6,10 +6,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
 import Leap
 import numpy as np
 import subprocess
+import pydub
 
 class SampleListener(Leap.Listener):
-    volume = 0
-
     gesture = None
     start_time = None
 
@@ -75,9 +74,6 @@ class SampleListener(Leap.Listener):
                     length = frame.timestamp - self.start_time
                     length /= 1000000.
                     print "gap:", length
-                    self.ap.recordingLoop = np.fft.rfft(self.ap.recordingLoop)
-                    #MANipulation
-                    self.ap.recordingLoop = np.fft.irfft(self.ap.recordingLoop)
                     self.ap.loop = list(self.ap.recordingLoop)
                     self.ap.recordingLoop = []
                     self.start_time = None
@@ -90,13 +86,16 @@ class SampleListener(Leap.Listener):
 
                 if len(extended_fingers) == 5 and len(prev_hand.fingers.extended()) == 5:
                     if roll < 25 and roll > -25:
-                        self.volume += (hand.palm_position[1] - prev_hand.palm_position[1]) * 1
-                        self.volume = max(0, self.volume)
-                        self.volume = min(100, self.volume)
-                        print "volume:", self.volume
-                        volume_string = str(self.volume) + "%"
-                        FNULL = open(os.devnull, 'w')
-                        subprocess.call(["amixer", "-D", "pulse", "sset", "Master", volume_string], stdout=FNULL, stderr=subprocess.STDOUT)
+                        audio_segment = pydub.AudioSegment(
+                            self.ap.loop,
+                            frame_rate = 44100,
+                            sample_width = 2,
+                            channels = 2
+                        )
+                        something = audio_segment + 1
+                        # audio_segment += (hand.palm_position[1] - prev_hand.palm_position[1]) * 1
+                        something_two = something.get_array_of_samples()
+                        self.ap.loop = np.array(something_two)
                     else:
                         if hand.palm_velocity[0] < 150 and hand.palm_velocity[0] > -150:
                             if self.is_swiping:
