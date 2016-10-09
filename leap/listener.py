@@ -4,7 +4,7 @@ arch_dir = '../lib/x64' if sys.maxsize > 2**32 else '../lib/x86'
 sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
 
 import Leap
-
+import numpy as np
 import subprocess
 
 class SampleListener(Leap.Listener):
@@ -75,6 +75,9 @@ class SampleListener(Leap.Listener):
                     length = frame.timestamp - self.start_time
                     length /= 1000000.
                     print "gap:", length
+                    self.ap.recordingLoop = np.fft.rfft(self.ap.recordingLoop)
+                    #MANipulation
+                    self.ap.recordingLoop = np.fft.irfft(self.ap.recordingLoop)
                     self.ap.loop = list(self.ap.recordingLoop)
                     self.ap.recordingLoop = []
                     self.start_time = None

@@ -4,6 +4,7 @@ import numpy as np
 import scipy.signal as signal
 import audioop as ap
 import curses
+from scikits.samplerate import resample
 from matplotlib import pyplot as plt
 
 WIDTH = 2
@@ -18,6 +19,9 @@ class audioProcessor:
         self.loop = []
         self.recordingLoop = []
         self.loopIndex = 0
+
+    # def pitchShift(self, sample):
+
 
     def processSound(self, in_data):
         decoded = np.fromstring(in_data, dtype=np.float32)
@@ -36,7 +40,7 @@ class audioProcessor:
             result_waiting = True
         elif self.playingBack:
             if self.recording:
-                self.recordingLoop.append(decoded)
+                self.recordingLoop.append(np.fromstring(in_data, dtype=np.float32))
             if self.loop:
                 if self.loopIndex > len(self.loop) - 1:
                     self.loopIndex = 0
